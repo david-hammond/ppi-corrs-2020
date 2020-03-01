@@ -1,0 +1,173 @@
+---
+title: "IEP Systems Correlations"
+resource_files:
+- www/iep_logo_white.png
+- worldmap.Rdata
+- ~/GitHub/ydi-2020/results/ydi.RData
+runtime: shiny
+output:
+  flexdashboard::flex_dashboard:
+    logo: www/iep_logo_white.png
+    theme: yeti
+    orientation: columns
+---
+
+<style>                     
+.navbar {
+  background-color:#404244;
+  border-color:black;
+}
+.section.sidebar {
+  background-color:#404244;
+  border-color:black;
+  color: white;
+}
+.navbar-logo {
+  margin-top: 7px;
+}
+</style>    
+
+```{r global, include=FALSE}
+# load data in 'global' chunk so it can be shared by all users of the dashboard
+library(tidyverse)
+library(plotly)
+library(DT)
+library(flexdashboard)
+library(leaflet)
+load("worldmap.Rdata")
+options(shiny.sanitize.errors = TRUE)
+thedata = readRDS("thedata.rds")
+tmp = thedata %>% group_by(category, group) %>%
+  top_n(1, abs(r)) %>% ungroup()
+thedata = thedata %>% filter(var1 %in% tmp$var1) %>% arrange(group, category, var1) %>%
+  mutate(var1 = factor(var1, factor(unique(var1)), ordered = T))
+
+gpi = readRDS("gpi.rds")
+bin = 60
+```
+
+
+
+
+Inputs {.sidebar}
+=====================================
+
+```{r}
+sliderInput("group", "Choose Grouping:",
+                  min = min(as.numeric(unique(thedata$group))), max = max(as.numeric(unique(thedata$group))),
+                  value = 1,
+            animate = animationOptions(playButton = "PLAY", interval = 5))
+
+```
+
+
+
+Results
+===================================== 
+
+Column
+-----------------------------------------------------------------------
+
+```{r echo = F}
+
+tmp = reactive({
+  thedata %>% filter(group == as.numeric(input$group)) %>% mutate(r = abs(r))
+})
+
+countries = reactive({
+  gpi = gpi %>% filter(between(rank, as.numeric(input$group), as.numeric(input$group)+bin)) 
+})
+```
+
+### Map
+```{r}
+
+# Create a color palette for the map:
+output$map <- renderLeaflet({
+  tmp = countries() %>% dplyr::filter(year == max(year)) %>%
+  select(geocode, value) %>% rename(ISO3 = geocode)
+  world_spdf@data = world_spdf@data %>% 
+    dplyr::left_join(tmp) %>% mutate(label = paste(NAME, value, sep = " - "))
+  mypalette <- colorNumeric( palette="viridis", domain=world_spdf@data$value, na.color="transparent")
+  qpal <- colorQuantile("Blues", world_spdf@data$value, n = 1)
+  leaflet(world_spdf, options = list(minZoom = 1.5, maxZoom = 11, noWrap = T, zoomSnap = 0.1, fillColor = 'green')) %>% 
+    addProviderTiles(providers$OpenStreetMap)  %>% 
+    setView( lat=13, lng=0 , zoom=1.5) %>%
+    addPolygons( stroke = FALSE, fillOpacity = 0.7, smoothFactor = 0.5, color = ~qpal(value), 
+                 label = ~label) %>%
+  setMaxBounds( lng1 = -90
+                , lat1 = -180
+                , lng2 = +90
+                , lat2 = 180 ) %>%
+  addLegend("bottomleft", pal = qpal, values = ~na.omit(value),
+    title = paste(input$metric1, "<br>Hover for Score Quantiles"),
+    labFormat = labelFormat(suffix = ""),
+    opacity = 1
+  )
+})
+leafletOutput('map')  
+```
+
+
+### Top 10
+
+```{r}
+renderDT({
+  tmp = tmp() %>% select(category, var1, r) %>%
+  arrange(category, desc(r)) %>% ungroup()
+  cols = RColorBrewer::brewer.pal(8, "Spectral")
+  DT::datatable(tmp, rownames = F, 
+                       options = list(pageLength = nrow(tmp),bPaginate = FALSE, dom = 't'), 
+              caption = paste("Data for", input$group)) %>% formatStyle(
+  'r',
+  backgroundColor = styleInterval(seq(0,1, length.out = 7), cols))
+  })
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Correlations
+```{r}
+renderPlot({
+data = tmp() %>% rename(individual = var1, value = r, slice = group, group = category) %>%
+    select(individual, group, value) %>% as.data.frame() %>% mutate(group = factor(group))
+  # Set a number of 'empty bar' to add at the end of each group
+  empty_bar <- 0
+  to_add <- data.frame( matrix(NA, empty_bar*nlevels(data$group), ncol(data)) )
+  colnames(to_add) <- colnames(data)
+  to_add$group <- rep(levels(data$group), each=empty_bar)
+  data <- rbind(data, to_add)
+  data <- data %>% arrange(group)
+  data$id <- seq(1, nrow(data))
+  data$alpha = ifelse(data$value > 0.3, 0.75, 0.2)
+  # Get the name and the y position of each label
+  label_data <- data
+  number_of_bar <- nrow(label_data)
+  angle <- 90 - 360 * (label_data$id-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+  label_data$hjust <- ifelse( angle < -90, 1, 0)
+  label_data$angle <- ifelse(angle < -90, angle+180, angle)
+  
+  # Make the plot
+  p <- ggplot(data, aes(x=as.factor(id), y=value, fill=group)) +       # Note that id is a factor. If x is numeric, there is some space between the first bar
+    geom_bar(stat="identity", alpha=data$alpha) +
+    ylim(0,1) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_blank(),
+      axis.title.x = element_blank(),
+      panel.grid.minor = element_blank(),
+      plot.margin = unit(rep(-0,4), "cm"),
+      axis.text.y = element_text(angle = 90, hjust = 0)
+    ) +
+    coord_polar() +
+    geom_text(data=label_data, aes(x=id, y=0.3, label=individual, hjust=hjust), color="black", fontface="bold",alpha=0.6, size=2.5, angle= label_data$angle, inherit.aes = FALSE ) +
+    labs(subtitle = paste("Correlations of countries ranked between", as.numeric(input$group), "and", as.numeric(input$group)+bin),
+         y = "R Value", fill = "Pillar")
+  
+  print(p)
+
+})
+
+```
+
