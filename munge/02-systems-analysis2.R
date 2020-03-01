@@ -7,19 +7,22 @@ toc = toc %>% filter(num_geos > 100)
 source("./munge/03-get-rid-of-spurious.R")
 toc = toc %>% filter(variablename != "Internal Peace Banded")
 toc = toc %>% filter(source != "IEP")
-toc = split(toc, toc$uid)
+toc$variablename == paste(to)
+toc = seq_along(toc$uid) %/% 100
+toc = split(toc, toc$id)
 gpi <- hdb_get(hdb_search("Internal Peace Banded")) %>% 
   filter(year == max(year)) %>% mutate(rank = rank(value))
 bin = 60
 
 get_corrs = function(id){
-  tmp = hdb_get(id) %>% rbind(gpi %>% select(-rank))
+  tmp = hdb_get(id) %>% rbind(gpi %>% select(-rank)) %>%
+    mutate(variablename = uid)
   all = NULL
-  for(i in 1:(nrow(gpi)-bin)){
+  for(i in seq(1, (nrow(gpi)-bin), by = 3)){
     tmp2 = gpi %>% filter(between(rank, i, i+bin))
     tmp3 = tmp %>% filter(geocode %in% tmp2$geocode) # how to do all years
     tmp3 = try(hcorr(tmp3) %>% filter(n > 40) %>% mutate(group = i) %>%
-      filter(var1 != "Internal Peace Banded"))
+      filter(var1 != "Internal Peace Banded", var2 == "Internal Peace Banded"))
     if(class(tmp3) == "try-error"){
       tmp3 = NULL
     }
