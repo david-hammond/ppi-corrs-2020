@@ -7,22 +7,22 @@ toc = toc %>% filter(num_geos > 100)
 source("./munge/03-get-rid-of-spurious.R")
 toc = toc %>% filter(variablename != "Internal Peace Banded")
 toc = toc %>% filter(source != "IEP")
-toc$variablename == paste(to)
-toc = seq_along(toc$uid) %/% 100
-toc = split(toc, toc$id)
+#toc$id = seq_along(toc$uid) %/% 100
+toc = split(toc, toc$uid)
 gpi <- hdb_get(hdb_search("Internal Peace Banded")) %>% 
   filter(year == max(year)) %>% mutate(rank = rank(value))
 bin = 60
 
 get_corrs = function(id){
-  tmp = hdb_get(id) %>% rbind(gpi %>% select(-rank)) %>%
-    mutate(variablename = uid)
+  tmp = hdb_get(id) %>%  
+    mutate(variablename = uid)%>%rbind(gpi %>% select(-rank))
   all = NULL
   for(i in seq(1, (nrow(gpi)-bin), by = 3)){
     tmp2 = gpi %>% filter(between(rank, i, i+bin))
     tmp3 = tmp %>% filter(geocode %in% tmp2$geocode) # how to do all years
     tmp3 = try(hcorr(tmp3) %>% filter(n > 40) %>% mutate(group = i) %>%
-      filter(var1 != "Internal Peace Banded", var2 == "Internal Peace Banded"))
+      filter(var1 != "Internal Peace Banded", var2 == "Internal Peace Banded")) %>%
+      select(-var2)
     if(class(tmp3) == "try-error"){
       tmp3 = NULL
     }
@@ -35,7 +35,7 @@ get_corrs = function(id){
 all = pblapply(toc, get_corrs)
 all = bind_rows(all) 
 saveRDS(all, file = "./data/all-correlations.rds")
-all = readRDS("./data/all-correlations.rds") %>% filter(signif == "***") %>% select(-var2, -n, -p, -signif)
+all = readRDS("./data/all-correlations.rds") %>% filter(signif == "***") %>% select( -n, -p, -signif)
 pillars = rio::import("./data/results-correlations-2018-internalpeace.csv")  %>% select(variablename1, category) %>%
   distinct() %>% rename(var1 = variablename1) %>% mutate(var1 = str_trim(var1))
 all = all %>% left_join(pillars) 
