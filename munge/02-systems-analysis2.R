@@ -1,10 +1,13 @@
 library(tidyverse)
 library(hammond)
 library(pbapply)
+
 hdb_login(host = "192.168.0.65", db = "nationalhdb", user = "guest", password = "guest")
 toc = hdb_toc()
 toc = toc %>% filter(num_geos > 100)
+
 source("./munge/03-get-rid-of-spurious.R")
+
 # toc = toc %>% filter(variablename != "Internal Peace Banded")
 # toc = toc %>% filter(source != "IEP")
 # #toc$id = seq_along(toc$uid) %/% 100

@@ -19,16 +19,16 @@ tmp = tmp[!pos,]
 pos = grepl("Religion Important -", tmp$variablename)
 tmp = tmp[!pos,]
 
-pos = grepl("DK/RF", toc$variablename)
-toc = toc[!pos,]
-pos = grepl("DK", toc$variablename)
-toc = toc[!pos,]
-pos = grepl("Imports Merchandise", toc$variablename)
-toc = toc[!pos,]
-pos = grepl("Percentile Rank", toc$variablename)
-toc = toc[!pos,]
-pos = grepl("Lower Bound of", toc$variablename)
-toc = toc[!pos,]
+pos = grepl("DK/RF", tmp$variablename)
+tmp = tmp[!pos,]
+pos = grepl("DK", tmp$variablename)
+tmp = tmp[!pos,]
+pos = grepl("Imports Merchandise", tmp$variablename)
+tmp = tmp[!pos,]
+pos = grepl("Percentile Rank", tmp$variablename)
+tmp = tmp[!pos,]
+pos = grepl("Lower Bound of", tmp$variablename)
+tmp = tmp[!pos,]
 
 
 
@@ -40,11 +40,29 @@ tmp = tmp %>% filter(!is.na(r)) %>%
   top_n(3, abs(r))
 
 
+plot_by_pillar <- function(x) {
+  pp = tmp %>% 
+    filter(category == x, group != "corall")
 
+  pp$variablename1 = factor(pp$variablename1, rev(unique(pp$variablename1)), ordered = T)
 
+  pp$group = gsub("cor", "Rank ", pp$group)
 
-pp_aro = tmp %>% filter(category == "pp-aro", group != "corall")
-pp_aro$variablename1 = factor(pp_aro$variablename1, rev(unique(pp_aro$variablename1)), ordered = T)
-pp_aro$group = gsub("cor", "Rank ", pp_aro$group)
-ggplot(pp_aro, aes(x = group, y = variablename1, size = abs(r))) +
+  p <- ggplot(pp, aes(x = group, y = variablename1, size = abs(r))) +
   geom_point() + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  p 
+  
+  return(as.data.frame(pp))} # not quite working,
+                             # need a good way to get the numbers alongside the chart
+
+
+
+plot_by_pillar("pp-wfg")
+plot_by_pillar("pp-llc")
+plot_by_pillar("pp-hlh")
+plot_by_pillar("pp-sbe")
+plot_by_pillar("pp-aro")
+plot_by_pillar("pp-grn")
+plot_by_pillar("pp-edr")
+plot_by_pillar("pp-ffi")
