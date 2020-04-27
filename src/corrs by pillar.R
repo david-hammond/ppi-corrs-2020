@@ -1,4 +1,5 @@
-library(tidyverse)
+
+# Dave said to use this data
 tmp = rio::import("S:/Institute for Economics and Peace/Research/Research Briefs/Positive Peace/Positive Peace Systems/Correlations/results-correlations-2018-internalpeace.xlsx",
                   which = 2)
 
