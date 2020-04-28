@@ -1,5 +1,6 @@
 ---
-title: "Positive peace at varying levels of violence"
+title: \textbf {Positive peace at varying levels of negative peace}
+
 output:
   pdf_document: default
   html_notebook: default
@@ -30,10 +31,9 @@ Previous research suggests that different aspects of positive peace (PP) are mos
 
 One possible method to observe this is to examine the correlations between PP indicators and internal peace in a group-wise fashion, looking at the specific correlations for highly peaceful countries, medium peace countries and less peaceful countries. 
 
-As an initial exploratory analysis, this has been done using subsets of 60 countries at a time, based on their internal peace rank. Figure 1 gives an example using indicators that have been categorized within Well-Functioning Government.
+As an initial exploratory analysis, this has been done using subsets of 60 countries at a time, based on their internal peace rank. Figure 1 gives an example using indicators that have been categorized within Well-Functioning Government. The chart shows the top 3 correlates for each group of countries.
 
-
-```{r, echo = F, fig.pos = "!", fig.cap= "WFG Correlates by internal peace rank, 2018"}
+```{r, echo = F, fig.pos = "H", fig.fullwidth = T, fig.cap= "WFG Correlates by internal peace rank, 2018"}
 x = "pp-wfg"
 
 pp = tmp %>% 
@@ -47,7 +47,9 @@ p <- ggplot(pp, aes(x = group, y = variablename1, size = abs(r))) +
   geom_point() + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(axis.text.y = element_text(size = 7),
         axis.text.x = element_text(size = 7),
-        plot.title = element_text(hjust = 0, size = 9)) +
+        legend.text = element_text(size = 7),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank()) +
   labs(y = "", x = "")
 
 p 
