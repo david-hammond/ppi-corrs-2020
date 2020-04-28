@@ -45,7 +45,7 @@ tmp = tmp[!pos,]
 
 pos = grepl("W-FG: ", tmp$variablename1)
 tmp = tmp[!pos,]
-pos = grepl("Rule of law", tmp$variablename1)
+pos = grepl("Rule of ", tmp$variablename1)
 tmp = tmp[!pos,]
 
 tmp$r = as.numeric(tmp$r)
