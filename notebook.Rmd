@@ -5,16 +5,55 @@ output:
   html_notebook: default
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+```{r echo = F, results = 'hide', warning=F, message=F}
 
-```{r}
-plot(cars)
+library('ProjectTemplate')
+purrr::quietly(load.project(override.config = list(data_loading =F)))
+
+
+df = rio::import("S:/Institute for Economics and Peace/Research/Research Briefs/Positive Peace/Positive Peace Systems/Correlations/results-correlations-2018-internalpeace.xlsx",
+                 which = 2)
+
+tmp = df %>% 
+  gather("group", "r", -c(names(df)[c(1:5)])) %>%
+  mutate(r = as.numeric(r)) %>% 
+  filter(!is.na(r)) %>% 
+  group_by(category, group) %>%
+  top_n(3, abs(r))
+
+
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+Previous research suggests that different aspects of positive peace (PP) are most valuable at different levels of negative peace (NP).
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+One possible method to observe this is to examine the correlations between PP indicators and internal peace in a group-wise fashion, looking at the specific correlations for highly peaceful countries, medium peace countries and less peaceful countries. 
+
+As an initial exploratory analysis, this has been done using subsets of 60 countries at a time, based on their internal peace rank. Figure 1 gives an example using indicators that have been categorized within Well-Functioning Government.
+
+
+```{r, echo = F, fig.pos = "!", fig.cap= "WFG Correlates by internal peace rank, 2018"}
+x = "pp-wfg"
+
+pp = tmp %>% 
+  filter(category == x, group != "corall")
+
+pp$variablename1 = factor(pp$variablename1, rev(unique(pp$variablename1)), ordered = T)
+
+pp$group = gsub("cor", "Rank ", pp$group)
+
+p <- ggplot(pp, aes(x = group, y = variablename1, size = abs(r))) +
+  geom_point() + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(axis.text.y = element_text(size = 7),
+        axis.text.x = element_text(size = 7),
+        plot.title = element_text(hjust = 0, size = 9)) +
+  labs(y = "", x = "")
+
+p 
+
+```
+
+
+
+
