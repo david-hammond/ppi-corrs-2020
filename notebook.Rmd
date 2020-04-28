@@ -7,14 +7,7 @@ output:
 ---
 
 
-```{r echo = F, results = 'hide', warning=F, message=F}
-
-library('ProjectTemplate')
-purrr::quietly(load.project(override.config = list(data_loading =F)))
-
-
-```
-
+## Exploratory analysis
 
 Previous research suggests that different aspects of positive peace (PP) are most valuable at different levels of negative peace (NP).
 
@@ -25,7 +18,7 @@ As an initial exploratory analysis, this has been done using subsets of 60 count
 The chart shows the top 3 correlates for each group of countries, from a dataset of roughly 4,600 indicators that have been categorized according to NP and the eight Pillars of PP. They are indicators for which data is available since 2018, inclusive, and which cover 160+ countries. Duplicative or clearly spurious correlations have been removed. [nt: only WFG]
 
 
-```{r, echo = F, fig.pos = "H", fig.fullwidth = T, fig.cap= "WFG Correlates by internal peace rank, 2018"}
+```{r, echo = F, warning=F, message=F, fig.pos = "h!", fig.fullwidth = T, fig.cap= "WFG Correlates by internal peace rank, 2018"}
 
 source("./munge/01 set up df.R")
 
@@ -55,25 +48,32 @@ p
 
 We can see that the data visualization is useful, but more work is required. 
 
-1. The categorization of the indicators requires review. Arguably, "trading across borders" is a better indicator of Sound Business Environment than Well-functioning Government. A robust categorization process - which can/should be partially automated - would use fixed inclusion criteria and 2-3 coders for peer review.
+1. The categorization of the indicators requires review. Arguably, "trading across borders" is a better indicator of Sound Business Environment than Well-functioning Government. A robust categorization process - which can/should be partially automated - would use inclusion criteria for each pillar (what the pillar does and does not capture) and 2-3 coders for peer review.
 
 2. The time series should be considered. If PP is generally slow moving, perhaps a longer time lag is more appropriate.
 
 3. The country groupings can be refined. Corelates are noticbly distinct at high and low levles of peacefulnes, but become very weak for the middle peace groups, particularly ranks 60 to 120. This suggests that there are distinct levels of peacefullness, and the 60-120 group captures at least two levels. 
 
 Appropriate groupings can be explored with some scatterplots:
-- government effectivness
-- political instability
-- presidential election
-- state authority over territory
+
+* government effectivness
+* political instability
+* presidential election
+* state authority over territory
 
 Iteratively reducing the number of groups based on distribution or other criteria can isolate the strongest correlations (i.e., ranks 1-60 vs 1-45).
 
-Next steps:
+## Next steps:
+
 1. Visualize some key indicators - need to get them from the db and develop plots
+
 2. Adjust country groupings - need to re-run Dave's grouped correlation function, using only a reduced set of indicators (uid's from Paulo's categorized list, minus spurious)
+
 3. Review results by pillar - outline key correlates for the new country groups (high, upper middle, mid, lower middle, low peace); develop visualization(s) to highlight the key factors for each peace group 
+
 4. Review pillar categorizations and expand dataset for correlates 
+
 5. Review results by peace group - plot results as above, but with the 24 correlates (top 3 * 8 pillars) on the y axis, grouped by pillar on the x axis, to show the key factors for each peace group. The pillars on the x axis may be ordered by the average r value of the included correlates, to show the relative importance of each pillar at varying levels of peace. 
+
 6. Lastly, the entire analysis is likely to be more interesting on risers and fallers, exploring the "peace transitions" groups used in previous PPRs (rising from low to mid peace and mid to high, and falling from high to mid, and mid to low)
 
