@@ -15,36 +15,7 @@ One possible method to observe this is to examine the correlations between PP in
 
 As an initial exploratory analysis, this has been done using subsets of 60 countries at a time, based on their internal peace rank. Figure 1 gives an example using indicators that have been categorized within Well-Functioning Government. 
 
-The chart shows the top 3 correlates for each group of countries, from a dataset of roughly 4,600 indicators that have been categorized according to NP and the eight Pillars of PP. They are indicators for which data is available since 2018, inclusive, and which cover 160+ countries. Duplicative or clearly spurious correlations have been removed. [nt: only WFG]
-
-
-```{r, echo = F, warning=F, message=F, fig.pos = "h!", fig.fullwidth = T, fig.cap= "WFG Correlates by internal peace rank, 2018"}
-
-source("./munge/01 set up df.R")
-
-x = "pp-wfg"
-
-pp = tmp %>% 
-  filter(category == x, group != "corall")
-
-pp$variablename1 = factor(pp$variablename1, rev(unique(pp$variablename1)), ordered = T)
-
-pp$group = gsub("cor", "Rank ", pp$group)
-
-p <- ggplot(pp, aes(x = group, y = variablename1, size = abs(r))) +
-  geom_point() + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  theme(axis.text.y = element_text(size = 7),
-        axis.text.x = element_text(size = 7),
-        legend.text = element_text(size = 7),
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank()) +
-  labs(y = "", x = "")
-
-p 
-
-```
-
-
+The chart shows the top 3 correlates for each group of countries, from a dataset of roughly 4,600 indicators that have been categorized according to NP and the eight Pillars of PP. They are indicators for which data is available since 2018, inclusive, and which cover 160+ countries. Duplicative or clearly spurious correlations have been removed. [nt: only WFG so far]
 
 We can see that the data visualization is useful, but more work is required. 
 
@@ -76,4 +47,90 @@ Iteratively reducing the number of groups based on distribution or other criteri
 5. Review results by peace group - plot results as above, but with the 24 correlates (top 3 * 8 pillars) on the y axis, grouped by pillar on the x axis, to show the key factors for each peace group. The pillars on the x axis may be ordered by the average r value of the included correlates, to show the relative importance of each pillar at varying levels of peace. 
 
 6. Lastly, the entire analysis is likely to be more interesting on risers and fallers, exploring the "peace transitions" groups used in previous PPRs (rising from low to mid peace and mid to high, and falling from high to mid, and mid to low)
+
+
+
+```{r, echo = F, warning=F, message=F, fig.fullwidth = T, fig.cap= "WFG Correlates by internal peace rank, 2018"}
+
+source("./munge/01 set up df.R")
+
+plot_by_pillar("pp-wfg")
+
+
+
+```
+
+
+```{r, echo = F, warning=F, message=F, fig.pos = "h!", fig.fullwidth = T, fig.cap= "LLC Correlates by internal peace rank, 2018"}
+
+source("./munge/01 set up df.R")
+
+plot_by_pillar("pp-llc")
+
+```
+
+```{r, echo = F, warning=F, message=F, fig.pos = "h!", fig.fullwidth = T, fig.cap= "HLH Correlates by internal peace rank, 2018"}
+
+source("./munge/01 set up df.R")
+
+plot_by_pillar("pp-hlh")
+
+
+
+```
+
+```{r, echo = F, warning=F, message=F, fig.pos = "h!", fig.fullwidth = T, fig.cap= "SBE Correlates by internal peace rank, 2018"}
+
+source("./munge/01 set up df.R")
+
+plot_by_pillar("pp-sbe")
+
+
+
+```
+
+```{r, echo = F, warning=F, message=F, fig.pos = "h!", fig.fullwidth = T, fig.cap= "ARO Correlates by internal peace rank, 2018"}
+
+source("./munge/01 set up df.R")
+
+plot_by_pillar("pp-aro")
+
+
+
+```
+
+
+```{r, echo = F, warning=F, message=F, fig.pos = "h!", fig.fullwidth = T, fig.cap= "GRN Correlates by internal peace rank, 2018"}
+
+source("./munge/01 set up df.R")
+
+plot_by_pillar("pp-grn")
+
+
+
+```
+
+
+```{r, echo = F, warning=F, message=F, fig.pos = "h!", fig.fullwidth = T, fig.cap= "EDR Correlates by internal peace rank, 2018"}
+
+source("./munge/01 set up df.R")
+
+plot_by_pillar("pp-edr")
+
+
+
+```
+
+
+```{r, echo = F, warning=F, message=F, fig.pos = "h!", fig.fullwidth = T, fig.cap= "FFI Correlates by internal peace rank, 2018"}
+
+source("./munge/01 set up df.R")
+
+plot_by_pillar("pp-ffi")
+
+
+
+```
+
+
 
