@@ -19,12 +19,30 @@ spurious = c("Control of Corruption: Number of Sources",
              "Free Flow of Information",
              "Well-Functioning Government")
 
+
+#  # next: how to map spurious onto tmp
+# tmp <- tmp %>%
+#   map(~grepl_rm(.x, spurious))
+
+
 tmp = tmp %>% filter(!(variablename1 %in% spurious))
 
-pos = grepl("Approval of China's Leadership", tmp$variablename1)
-tmp = tmp[!pos,]
-pos = grepl("Approval of U.S. Leadership", tmp$variablename1)
-tmp = tmp[!pos,]
+
+grepl_rm <- function(tmp, y) {
+ 
+  pos = grepl(y, tmp$variablename1)
+  tmp = tmp[!pos,]
+
+  return(tmp) }
+
+tmp <- grepl_rm(tmp, "Approval of ")
+
+
+
+
+
+
+
 pos = grepl("Approval of ", tmp$variablename1)
 tmp = tmp[!pos,]
 
