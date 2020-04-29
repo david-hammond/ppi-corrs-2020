@@ -3,6 +3,7 @@ title: \textbf {Positive peace at varying levels of negative peace}
 
 output:
   pdf_document: default
+  word_document: default
   html_notebook: default
 ---
 
